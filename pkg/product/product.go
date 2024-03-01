@@ -1,18 +1,34 @@
 package product
 
+import (
+	"database/sql"
+)
+
 type Product struct {
-	ID              int     `json:"id"`
-	Name            string  `json:"name"`
-	Price           float64 `json:"price"`
-	Description     string  `json:"description"`
-	QuantityInStock int     `json:"quantity_in_stock"`
+	ID              int
+	Name            string
+	Price           float64
+	Description     string
+	QuantityInStock int
 }
 
-func GetAllProducts() []Product {
-	products := []Product{
-		{ID: 1, Name: "Product 1", Price: 10.99, Description: "Description of Product 1", QuantityInStock: 100},
-		{ID: 2, Name: "Product 2", Price: 19.99, Description: "Description of Product 2", QuantityInStock: 50},
-		{ID: 3, Name: "Product 3", Price: 29.99, Description: "Description of Product 3", QuantityInStock: 200},
+func GetAllProductsFromDB(db *sql.DB) ([]Product, error) {
+	var products []Product
+
+	rows, err := db.Query("SELECT id, name, price, description, quantity_in_stock FROM products")
+	if err != nil {
+		return nil, err
 	}
-	return products
+	defer rows.Close()
+
+	for rows.Next() {
+		var p Product
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
 }
