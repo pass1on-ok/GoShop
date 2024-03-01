@@ -7,7 +7,7 @@ Murat Dias, 22B030564
 Mirpulatov Rozimurat, 22B031185
 ```
 
-Application to create an online store where users can view products, add them to cart, place orders and view order history.
+Application where users can view products, add them to cart, place orders and view order history.
 
 ## API structure:
 ```
