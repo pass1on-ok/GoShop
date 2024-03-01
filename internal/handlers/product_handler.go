@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/pass1on-ok/Golang-Project/pkg/product"
+	"onlinestore/pkg/product"
 )
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
