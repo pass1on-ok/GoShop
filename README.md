@@ -2,15 +2,18 @@
 # Project description:
 Application to create an online store where users can view products, add them to cart, place orders and view order history.
 
-# API structure:
+## API structure:
+```
 GET /products: Get a list of all products
 GET /products/{id}: Get information about a product by its id
 POST /cart/add: Add product to cart
 GET /cart: Get cart contents
 POST /order: Place an order
 GET /orders: Get a list of all user orders
+```
 
-# DB Structure:
+## DB Structure:
+```
 Table user {
 ID bigserial primary key
 Name varchar
@@ -76,3 +79,4 @@ Table order_status{
 ID bigserial primary key
 Status varchar
 }
+```
