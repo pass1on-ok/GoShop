@@ -11,7 +11,7 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/products", handlers.GetProducts).Methods("GET")
+	r.HandleFunc("/home", handlers.GetProducts).Methods("GET")
 
 	log.Println("Server is running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", r))
