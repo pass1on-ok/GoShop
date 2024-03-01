@@ -4,12 +4,48 @@ Application to create an online store where users can view products, add them to
 
 ## API structure:
 ```
-GET /products: Get a list of all products
-GET /products/{id}: Get information about a product by its id
-POST /cart/add: Add product to cart
-GET /cart: Get cart contents
-POST /order: Place an order
-GET /orders: Get a list of all user orders
+GET /users
+GET /users/{id}
+POST /users
+PUT /users/{id}
+DELETE /users/{id}
+
+GET /categories
+GET /categories/{id}
+POST /categories
+PUT /categories/{id}
+DELETE /categories/{id}
+
+GET /products
+GET /products/{id}
+POST /products
+PUT /products/{id}
+DELETE /products/{id}
+
+GET /products/{id}/reviews
+POST /products/{id}/reviews
+
+GET /cart/{user_id}
+POST /cart/{user_id}
+DELETE /cart/{user_id}
+
+GET /orders/{user_id}
+POST /orders/{user_id}
+
+GET /shipping
+POST /shipping
+PUT /shipping/{id}
+DELETE /shipping/{id}
+
+GET /payment-methods
+POST /payment-methods
+PUT /payment-methods/{id}
+DELETE /payment-methods/{id}
+
+GET /order-status
+POST /order-status
+PUT /order-status/{id}
+DELETE /order-status/{id}
 ```
 
 ## DB Structure:
