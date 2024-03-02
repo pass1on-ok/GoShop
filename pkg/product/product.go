@@ -1,3 +1,5 @@
+//pkg/product/product.go
+
 package product
 
 import (
@@ -10,12 +12,13 @@ type Product struct {
 	Price           float64
 	Description     string
 	QuantityInStock int
+	ImagePath       string
 }
 
 func GetAllProductsFromDB(db *sql.DB) ([]Product, error) {
 	var products []Product
 
-	rows, err := db.Query("SELECT id, name, price, description, quantity_in_stock FROM products")
+	rows, err := db.Query("SELECT id, name, price, description, quantity_in_stock,imagepath FROM products")
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +26,7 @@ func GetAllProductsFromDB(db *sql.DB) ([]Product, error) {
 
 	for rows.Next() {
 		var p Product
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock)
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock, &p.ImagePath)
 		if err != nil {
 			return nil, err
 		}

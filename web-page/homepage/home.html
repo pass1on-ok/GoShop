@@ -1,16 +1,20 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Store</title>
-    <link rel="stylesheet" href="/web-page/homepage/styles.css">
+    <title>Products</title>
 </head>
 <body>
-    <h1>Product List</h1>
-    <ul id="product-list">
+    <h1>Products</h1>
+    <ul>
         {{range .}}
-            <li>{{.Name}}: ${{.Price}}</li>
+            <li>
+                <img src="{{.ImagePath}}" alt="{{.Name}}" style="width: 100px; height: 100px;">
+                {{.ID}} - {{.Name}} - ${{.Price}}
+            </li>
         {{end}}
     </ul>
 </body>
