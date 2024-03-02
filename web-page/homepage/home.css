@@ -1,4 +1,4 @@
-/*web-page/homepage/home.css*/
+/* home.css */
 
 body {
     font-family: Arial, sans-serif;
@@ -14,41 +14,43 @@ header {
     text-align: center;
 }
 
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+main {
     padding: 20px;
 }
 
-.product {
+.products {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.product-container {
+    width: 250px;
+    margin-bottom: 20px;
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 10px;
-    padding: 20px;
-    width: 300px;
     text-align: center;
 }
 
-.product img {
-    width: 200px;
-    height: auto;
+.product-container img {
+    height: 50px;
+    margin-top: 20px;
+}
+
+.product-container .details {
+    padding: 10px;
+}
+
+.product-container h2 {
     margin-bottom: 10px;
 }
 
-.product h2 {
-    margin-bottom: 10px;
-    font-size: 20px;
+.product-container p {
+    margin-bottom: 5px;
 }
 
-.product .price {
-    font-size: 18px;
-    color: #4CAF50;
-    margin-bottom: 15px;
-}
-
-.product button {
+.product-container button {
     background-color: #4CAF50;
     color: #fff;
     padding: 10px 20px;
@@ -58,6 +60,13 @@ header {
     transition: background-color 0.3s;
 }
 
-.product button:hover {
+.product-container button:hover {
     background-color: #45a049;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
 }
