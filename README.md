@@ -81,7 +81,7 @@ Name varchar
 Price numeric
 Description text
 Quantity_in_stock integer
-
+ImagePath text
 }
 Table product_reviews {
 ID bigserial primary key
