@@ -6,80 +6,110 @@
     <title>Online Store</title>
     
     <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-}
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-}
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
 
-main {
-    padding: 20px;
-}
+        main {
+            padding: 20px;
+        }
 
-.products {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; 
-}
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; 
+        }
 
-.product-container {
-    width: 200px; 
-    margin: 10px; 
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
+        .product-container {
+            width: 200px; 
+            margin: 10px; 
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
 
-.product-container img {
-    height: 120px; 
-    margin-top: 20px;
-}
+        .product-container img {
+            height: 120px; 
+            margin-top: 20px;
+        }
 
-.product-container .details {
-    padding: 10px;
-}
+        .product-container .details {
+            padding: 10px;
+        }
 
-.product-container h2 {
-    margin-bottom: 5px; 
-    font-size: 16px; 
-}
+        .product-container h2 {
+            margin-bottom: 5px; 
+            font-size: 16px; 
+            cursor: pointer;
+        }
 
-.product-container p {
-    margin: 0; 
-    font-size: 14px; 
-}
+        .product-container p {
+            margin: 0; 
+            font-size: 14px; 
+        }
 
-.product-container button {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 8px 16px; 
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
+        .product-container .description {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
 
-.product-container button:hover {
-    background-color: #45a049;
-}
+        .product-container textarea {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 10px;
+            resize: none;
+        }
 
-footer {
-    background-color: #333;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-}
+        .product-container button {
+            margin-top: 10px;
+            padding: 8px 16px; 
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
+        .product-container button.add-to-cart-btn {
+            background-color: #4CAF50;
+            color: #fff;
+        }
 
+        .product-container button.delete-btn {
+            background-color: #FF5733;
+            color: #fff;
+        }
+
+        .product-container button.edit-btn {
+            background-color: #4A90E2;
+            color: #fff;
+        }
+
+        .product-container button:hover {
+            filter: brightness(90%);
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -90,21 +120,245 @@ footer {
     <main>
         <section class="products">
             {{range .}}
-            <div class="product-container">
-                <img src="{{.ImagePath}}" alt="{{.Name}}">
-                <div class="details">
-                    <h2>{{.Name}}</h2>
-                    <p>Price: {{.Price}} T</p>
-                    <button>Add to Cart</button>
-                </div>
-            </div>
-        {{end}}
+<div class="product-container" data-product-id="{{.ID}}">
+    <img src="{{.ImagePath}}" alt="{{.Name}}">
+    <div class="details">
+        <h2 class="product-title">{{.Name}}</h2>
+        <div class="description">
+            <p>{{.Description}}</p>
+            <textarea class="edit-description" style="display: none;"></textarea>
+        </div>
+        <p>Price: {{.Price}} T</p>
+        <button class="add-to-cart-btn">Add to Cart</button>
+        <button class="delete-btn">Delete</button>
+        <button class="edit-btn">Edit</button>
+        <button class="save-btn" style="display: none;">Save</button>
+    </div>
+</div>
+{{end}}
         </section>
     </main>
 
     <footer>
         <p>&copy; STORE</p>
     </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const productContainers = document.querySelectorAll(".product-container");
+            const productTitles = document.querySelectorAll(".product-title");
+            const deleteBtns = document.querySelectorAll(".delete-btn");
+            const editBtns = document.querySelectorAll(".edit-btn");
+            const saveBtns = document.querySelectorAll(".save-btn");
+            const descriptions = document.querySelectorAll(".description");
+            const editDescriptions = document.querySelectorAll(".edit-description");
+    
+            productContainers.forEach((container, index) => {
+                const deleteBtn = container.querySelector(".delete-btn");
+    
+                deleteBtn.addEventListener("click", function() {
+                    const productId = container.dataset.productId;
+    
+                    fetch(`/api/products/${productId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with your fetch operation:', error);
+                    });
+                });
+    
+                productTitles[index].addEventListener("click", function() {
+                    const description = descriptions[index];
+                    description.style.display = (description.style.display === "none" || description.style.display === "") ? "block" : "none";
+                });
+    
+                editBtns[index].addEventListener("click", function() {
+                    const description = descriptions[index];
+                    const editDescription = editDescriptions[index];
+    
+                    description.style.display = "none";
+                    editDescription.value = description.querySelector("p").innerText;
+                    editDescription.style.display = "block";
+                    editBtns[index].style.display = "none";
+                    saveBtns[index].style.display = "block";
+                });
+    
+                saveBtns[index].addEventListener("click", function() {
+                    const productId = container.dataset.productId;
+                    const editDescription = editDescriptions[index].value;
+    
+                    fetch(`/api/products/${productId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            Description: editDescription
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with your fetch operation:', error);
+                    });
+                });
+            });
+        });
+    </script>
+    
 </body>
 </html>
+<!--<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const productContainers = document.querySelectorAll(".product-container");
 
+            productContainers.forEach((container, index) => {
+                const deleteBtn = container.querySelector(".delete-btn");
+
+                deleteBtn.addEventListener("click", function() {
+                    const productId = container.dataset.productId;
+
+                    fetch(`/api/products/${productId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        
+                        window.location.reload();
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with your fetch operation:', error);
+                    });
+                });
+            });
+        });
+    </script>
+-->
+
+<!--<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const productContainers = document.querySelectorAll(".product-container");
+        const productTitles = document.querySelectorAll(".product-title");
+        const deleteBtns = document.querySelectorAll(".delete-btn");
+        const editBtns = document.querySelectorAll(".edit-btn");
+        const saveBtns = document.querySelectorAll(".save-btn");
+        const descriptions = document.querySelectorAll(".description");
+        const editDescriptions = document.querySelectorAll(".edit-description");
+
+        productContainers.forEach((container, index) => {
+            const deleteBtn = container.querySelector(".delete-btn");
+
+            deleteBtn.addEventListener("click", function() {
+                const productId = container.dataset.productId;
+
+                fetch(`/api/products/${productId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('There was a problem with your fetch operation:', error);
+                });
+            });
+
+            productTitles[index].addEventListener("click", function() {
+                const description = descriptions[index];
+                description.style.display = (description.style.display === "none" || description.style.display === "") ? "block" : "none";
+            });
+
+            deleteBtns[index].addEventListener("click", function() {
+                const productContainer = deleteBtns[index].closest(".product-container");
+                productContainer.remove();
+            });
+
+            editBtns[index].addEventListener("click", function() {
+                const description = descriptions[index];
+                const editDescription = editDescriptions[index];
+
+                description.style.display = "none";
+                editDescription.value = description.querySelector("p").innerText;
+                editDescription.style.display = "block";
+                editBtns[index].style.display = "none";
+                saveBtns[index].style.display = "block";
+            });
+
+            saveBtns[index].addEventListener("click", function() {
+                const description = descriptions[index];
+                const editDescription = editDescriptions[index];
+
+                description.querySelector("p").innerText = editDescription.value;
+                description.style.display = "block";
+                editDescription.style.display = "none";
+                editBtns[index].style.display = "block";
+                saveBtns[index].style.display = "none";
+            });
+        });
+    });
+</script>
+-->
+
+<!--
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const productTitles = document.querySelectorAll(".product-title");
+            const deleteBtns = document.querySelectorAll(".delete-btn");
+            const editBtns = document.querySelectorAll(".edit-btn");
+            const saveBtns = document.querySelectorAll(".save-btn");
+            const descriptions = document.querySelectorAll(".description");
+            const editDescriptions = document.querySelectorAll(".edit-description");
+
+            productTitles.forEach((title, index) => {
+                title.addEventListener("click", function() {
+                    const description = descriptions[index];
+                    description.style.display = (description.style.display === "none" || description.style.display === "") ? "block" : "none";
+                });
+
+                deleteBtns[index].addEventListener("click", function() {
+                    const productContainer = deleteBtns[index].closest(".product-container");
+                    productContainer.remove();
+                });
+
+                editBtns[index].addEventListener("click", function() {
+                    const description = descriptions[index];
+                    const editDescription = editDescriptions[index];
+
+                    description.style.display = "none";
+                    editDescription.value = description.querySelector("p").innerText;
+                    editDescription.style.display = "block";
+                    editBtns[index].style.display = "none";
+                    saveBtns[index].style.display = "block";
+                });
+
+                saveBtns[index].addEventListener("click", function() {
+                    const description = descriptions[index];
+                    const editDescription = editDescriptions[index];
+
+                    description.querySelector("p").innerText = editDescription.value;
+                    description.style.display = "block";
+                    editDescription.style.display = "none";
+                    editBtns[index].style.display = "block";
+                    saveBtns[index].style.display = "none";
+                });
+            });
+        });
+    </script>
+-->
