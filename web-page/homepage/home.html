@@ -110,6 +110,50 @@
             padding: 20px;
             text-align: center;
         }
+
+        #searchInput {
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 300px;
+    }
+
+    .new-product-container {
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .new-product-container input[type="text"],
+    .new-product-container input[type="number"],
+    .new-product-container textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .new-product-container button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .new-product-container button:hover {
+        background-color: #45a049;
+    }
     </style>
 </head>
 <body>
@@ -118,6 +162,7 @@
     </header>
 
     <main>
+        <input type="text" id="searchInput" placeholder="Search by Product Name">
         <section class="products">
             {{range .}}
 <div class="product-container" data-product-id="{{.ID}}">
@@ -137,6 +182,14 @@
 </div>
 {{end}}
         </section>
+        <div class="new-product-container">
+            <input type="text" id="productName" placeholder="Product Name">
+            <input type="number" id="productPrice" placeholder="Product Price">
+            <textarea id="productDescription" placeholder="Product Description"></textarea>
+            <input type="number" id="productQuantity" placeholder="Quantity in Stock">
+            <input type="text" id="productImage" placeholder="Image URL">
+            <button id="createProductBtn">Create Product</button>
+        </div>
     </main>
 
     <footer>
@@ -145,6 +198,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            
             const productContainers = document.querySelectorAll(".product-container");
             const productTitles = document.querySelectorAll(".product-title");
             const deleteBtns = document.querySelectorAll(".delete-btn");
@@ -152,7 +206,25 @@
             const saveBtns = document.querySelectorAll(".save-btn");
             const descriptions = document.querySelectorAll(".description");
             const editDescriptions = document.querySelectorAll(".edit-description");
+            const searchInput = document.getElementById("searchInput");
+            const createProductBtn = document.getElementById("createProductBtn");
     
+            
+            function filterProducts(searchTerm) {
+                productContainers.forEach(container => {
+                    const productName = container.querySelector(".product-title").innerText.toLowerCase();
+                    const isVisible = productName.includes(searchTerm);
+                    container.style.display = isVisible ? "block" : "none";
+                });
+            }
+    
+            
+            searchInput.addEventListener("input", function() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                filterProducts(searchTerm);
+            });
+    
+            
             productContainers.forEach((container, index) => {
                 const deleteBtn = container.querySelector(".delete-btn");
     
@@ -166,7 +238,6 @@
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
                         }
-                        
                         window.location.reload();
                     })
                     .catch(error => {
@@ -207,158 +278,51 @@
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
                         }
-                        
                         window.location.reload();
                     })
                     .catch(error => {
                         console.error('There was a problem with your fetch operation:', error);
                     });
+                });
+            });
+    
+            
+            createProductBtn.addEventListener("click", function() {
+                const productName = document.getElementById("productName").value;
+                const productPrice = document.getElementById("productPrice").value;
+                const productDescription = document.getElementById("productDescription").value;
+                const productQuantity = document.getElementById("productQuantity").value;
+                const productImage = document.getElementById("productImage").value;
+    
+                const newProduct = {
+                    name: productName,
+                    price: parseFloat(productPrice),
+                    description: productDescription,
+                    quantityInStock: parseInt(productQuantity),
+                    imagePath: productImage
+                };
+    
+                fetch("/api/products", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newProduct)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to create product');
+                    }
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error creating product:', error);
                 });
             });
         });
     </script>
     
+    
+    
 </body>
 </html>
-<!--<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const productContainers = document.querySelectorAll(".product-container");
-
-            productContainers.forEach((container, index) => {
-                const deleteBtn = container.querySelector(".delete-btn");
-
-                deleteBtn.addEventListener("click", function() {
-                    const productId = container.dataset.productId;
-
-                    fetch(`/api/products/${productId}`, {
-                        method: 'DELETE',
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        
-                        window.location.reload();
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with your fetch operation:', error);
-                    });
-                });
-            });
-        });
-    </script>
--->
-
-<!--<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const productContainers = document.querySelectorAll(".product-container");
-        const productTitles = document.querySelectorAll(".product-title");
-        const deleteBtns = document.querySelectorAll(".delete-btn");
-        const editBtns = document.querySelectorAll(".edit-btn");
-        const saveBtns = document.querySelectorAll(".save-btn");
-        const descriptions = document.querySelectorAll(".description");
-        const editDescriptions = document.querySelectorAll(".edit-description");
-
-        productContainers.forEach((container, index) => {
-            const deleteBtn = container.querySelector(".delete-btn");
-
-            deleteBtn.addEventListener("click", function() {
-                const productId = container.dataset.productId;
-
-                fetch(`/api/products/${productId}`, {
-                    method: 'DELETE',
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    
-                    window.location.reload();
-                })
-                .catch(error => {
-                    console.error('There was a problem with your fetch operation:', error);
-                });
-            });
-
-            productTitles[index].addEventListener("click", function() {
-                const description = descriptions[index];
-                description.style.display = (description.style.display === "none" || description.style.display === "") ? "block" : "none";
-            });
-
-            deleteBtns[index].addEventListener("click", function() {
-                const productContainer = deleteBtns[index].closest(".product-container");
-                productContainer.remove();
-            });
-
-            editBtns[index].addEventListener("click", function() {
-                const description = descriptions[index];
-                const editDescription = editDescriptions[index];
-
-                description.style.display = "none";
-                editDescription.value = description.querySelector("p").innerText;
-                editDescription.style.display = "block";
-                editBtns[index].style.display = "none";
-                saveBtns[index].style.display = "block";
-            });
-
-            saveBtns[index].addEventListener("click", function() {
-                const description = descriptions[index];
-                const editDescription = editDescriptions[index];
-
-                description.querySelector("p").innerText = editDescription.value;
-                description.style.display = "block";
-                editDescription.style.display = "none";
-                editBtns[index].style.display = "block";
-                saveBtns[index].style.display = "none";
-            });
-        });
-    });
-</script>
--->
-
-<!--
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const productTitles = document.querySelectorAll(".product-title");
-            const deleteBtns = document.querySelectorAll(".delete-btn");
-            const editBtns = document.querySelectorAll(".edit-btn");
-            const saveBtns = document.querySelectorAll(".save-btn");
-            const descriptions = document.querySelectorAll(".description");
-            const editDescriptions = document.querySelectorAll(".edit-description");
-
-            productTitles.forEach((title, index) => {
-                title.addEventListener("click", function() {
-                    const description = descriptions[index];
-                    description.style.display = (description.style.display === "none" || description.style.display === "") ? "block" : "none";
-                });
-
-                deleteBtns[index].addEventListener("click", function() {
-                    const productContainer = deleteBtns[index].closest(".product-container");
-                    productContainer.remove();
-                });
-
-                editBtns[index].addEventListener("click", function() {
-                    const description = descriptions[index];
-                    const editDescription = editDescriptions[index];
-
-                    description.style.display = "none";
-                    editDescription.value = description.querySelector("p").innerText;
-                    editDescription.style.display = "block";
-                    editBtns[index].style.display = "none";
-                    saveBtns[index].style.display = "block";
-                });
-
-                saveBtns[index].addEventListener("click", function() {
-                    const description = descriptions[index];
-                    const editDescription = editDescriptions[index];
-
-                    description.querySelector("p").innerText = editDescription.value;
-                    description.style.display = "block";
-                    editDescription.style.display = "none";
-                    editBtns[index].style.display = "block";
-                    saveBtns[index].style.display = "none";
-                });
-            });
-        });
-    </script>
--->

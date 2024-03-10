@@ -98,17 +98,14 @@ func UpdateProduct(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		
 		currentProduct, err := product.GetProductByIDFromDB(db, productID)
 		if err != nil {
 			http.Error(w, "Error retrieving product", http.StatusInternalServerError)
 			return
 		}
 
-		
 		currentProduct.Description = updatedDescription.Description
 
-		
 		err = product.UpdateProductInDB(db, *currentProduct)
 		if err != nil {
 			http.Error(w, "Error updating product", http.StatusInternalServerError)

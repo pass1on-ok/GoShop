@@ -1,7 +1,9 @@
 // pkg/product/product.go
 package product
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Product struct {
 	ID              int
