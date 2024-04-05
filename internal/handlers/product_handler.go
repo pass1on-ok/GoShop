@@ -14,7 +14,35 @@ import (
 
 func GetProducts(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		products, err := product.GetAllProductsFromDB(db)
+		pageStr := r.URL.Query().Get("page")
+		perPageStr := r.URL.Query().Get("perPage")
+
+		var page, perPage int
+		var err error
+
+		if pageStr == "" {
+			page = 1
+		} else {
+			page, err = strconv.Atoi(pageStr)
+			if err != nil || page < 1 {
+				http.Error(w, "Invalid page number", http.StatusBadRequest)
+				return
+			}
+		}
+
+		if perPageStr == "" {
+			perPage = 6
+		} else {
+			perPage, err = strconv.Atoi(perPageStr)
+			if err != nil || perPage < 1 {
+				http.Error(w, "Invalid perPage value", http.StatusBadRequest)
+				return
+			}
+		}
+
+		offset := (page - 1) * perPage
+
+		products, err := product.GetProductsByPageFromDB(db, offset, perPage)
 		if err != nil {
 			log.Println("Error getting products:", err)
 			http.Error(w, "Error getting products", http.StatusInternalServerError)

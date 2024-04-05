@@ -49,14 +49,28 @@ func main() {
 
 	r := mux.NewRouter()
 
-	fs := http.FileServer(http.Dir("web-page"))
-	http.Handle("/web-page/", http.StripPrefix("/web-page/", fs))
+	r.HandleFunc("/home.html", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		http.ServeFile(w, r, "web-page/homepage/home.html")
+	})
+
+	r.HandleFunc("/homestyle.css", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/css")
+		http.ServeFile(w, r, "web-page/homepage/homestyle.css")
+	})
+
+	r.HandleFunc("/homescript.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript")
+		http.ServeFile(w, r, "web-page/homepage/homescript.js")
+	})
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, db)
 	}).Methods("GET")
 
-	r.HandleFunc("/api/products", handlers.GetProducts(db)).Methods("GET")
+	//Пагинацию надо сделать, вот так я начал
+	r.HandleFunc("/api/products", handlers.GetProducts(db)).Methods("GET").Queries("page", "{page}", "perPage", "{perPage}")
+
 	r.HandleFunc("/api/products/{id}", handlers.GetProductByID(db)).Methods("GET")
 	r.HandleFunc("/api/products", handlers.CreateProduct(db)).Methods("POST")
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")

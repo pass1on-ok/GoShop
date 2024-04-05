@@ -1,15 +1,5 @@
-<!--web-page\homepage\home.html-->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Store</title>
-    <link rel="stylesheet" href="/web-page/homepage/homestyle.css">
-
-    <script src="/web-page/homepage/homescript.js"></script>
-    <style>
-        body {
+/* homestyle.css */
+body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -157,51 +147,3 @@ transition: background-color 0.3s;
 .new-product-container button:hover {
 background-color: #45a049;
 }
-    </style>
-</head>
-<body>
-    <script src="homescript.js"></script>
-    <header>
-        <h1>Welcome to Store</h1>
-    </header>
-
-    <main>
-        <input type="text" id="searchInput" placeholder="Search by Product Name">
-        <button id="sortButton">Sort by Price</button>
-        <section class="products">
-            {{range .}}
-            <div class="product-container" data-product-id="{{.ID}}">
-                <img src="{{.ImagePath}}" alt="{{.Name}}">
-                <div class="details">
-                    <h2 class="product-title">{{.Name}}</h2>
-                    <div class="description">
-                        <p>{{.Description}}</p>
-                        <textarea class="edit-description" style="display: none;"></textarea>
-                    </div>
-                    <p class="product-price">Price: {{.Price}} T</p>
-                    <button class="add-to-cart-btn">Add to Cart</button>
-                    <button class="delete-btn">Delete</button>
-                    <button class="edit-btn">Edit</button>
-                    <button class="save-btn" style="display: none;">Save</button>
-                </div>
-            </div>
-            {{end}}
-        </section>
-        
-        
-        <div class="new-product-container">
-            <input type="text" id="productName" placeholder="Product Name">
-            <input type="number" id="productPrice" placeholder="Product Price">
-            <textarea id="productDescription" placeholder="Product Description"></textarea>
-            <input type="number" id="productQuantity" placeholder="Quantity in Stock">
-            <input type="text" id="productImage" placeholder="Image URL">
-            <button id="createProductBtn">Create Product</button>
-        </div>
-    </main>
-
-    <footer>
-        <p>&copy; STORE</p>
-    </footer>   
-    
-</body>
-</html>

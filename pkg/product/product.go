@@ -114,3 +114,25 @@ func EnsureTableExists(db *sql.DB) error {
 	)`)
 	return err
 }
+
+// Вот так я переписал, если надо можете изменить
+func GetProductsByPageFromDB(db *sql.DB, offset, limit int) ([]Product, error) {
+	var products []Product
+
+	rows, err := db.Query("SELECT id, name, price, description, quantity_in_stock, imagepath FROM products ORDER BY id LIMIT $1 OFFSET $2", limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var p Product
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock, &p.ImagePath)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
+}
