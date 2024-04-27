@@ -4,7 +4,6 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"onlinestore/pkg/product"
 	"strconv"
@@ -12,52 +11,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetProducts(db *sql.DB) http.HandlerFunc {
+func GetAllProducts(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		pageStr := r.URL.Query().Get("page")
-		perPageStr := r.URL.Query().Get("perPage")
-
-		var page, perPage int
-		var err error
-
-		if pageStr == "" {
-			page = 1
-		} else {
-			page, err = strconv.Atoi(pageStr)
-			if err != nil || page < 1 {
-				http.Error(w, "Invalid page number", http.StatusBadRequest)
-				return
-			}
-		}
-
-		if perPageStr == "" {
-			perPage = 6
-		} else {
-			perPage, err = strconv.Atoi(perPageStr)
-			if err != nil || perPage < 1 {
-				http.Error(w, "Invalid perPage value", http.StatusBadRequest)
-				return
-			}
-		}
-
-		offset := (page - 1) * perPage
-
-		products, err := product.GetProductsByPageFromDB(db, offset, perPage)
+		products, err := product.GetAllProductsFromDB(db)
 		if err != nil {
-			log.Println("Error getting products:", err)
-			http.Error(w, "Error getting products", http.StatusInternalServerError)
-			return
-		}
-
-		jsonData, err := json.Marshal(products)
-		if err != nil {
-			log.Println("Error converting data to JSON:", err)
-			http.Error(w, "Error converting data to JSON", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(jsonData)
+		json.NewEncoder(w).Encode(products)
 	}
 }
 

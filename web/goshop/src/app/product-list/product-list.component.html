@@ -1,0 +1,22 @@
+<section class="products">
+    <div *ngFor="let product of products" class="product-container" [routerLink]="['/products', product.ID]">
+        <img [src]="product.ImagePath" [alt]="product.Name">
+        <div class="details">
+            <h2 class="product-title">{{ product.Name }}</h2>
+            <div class="description">
+                <p>{{ product.Description }}</p>
+                <textarea class="edit-description" style="display: none;"></textarea>
+            </div>
+            <div>
+            <p class="product-price">Price: {{ product.Price }} ₸</p>
+        </div>
+        <div>
+            <button class="cart-button">Add to Cart</button>
+        </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; STORE</p>
+</footer>

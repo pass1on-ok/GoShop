@@ -10,10 +10,11 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/cors"
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://postgres:123@localhost/Online%20Store?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,7 +24,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	products := []product.Product{
 		{Name: "Apple iPhone 15 Pro Max 256Gb Gray", Price: 654857, Description: "Product Description 1", QuantityInStock: 12, ImagePath: "https://resources.cdn-kaspi.kz/img/m/p/hc1/h65/83559848181790.png?format=preview-large"},
 		{Name: "Apple iPhone 13 128Gb Midnight Black", Price: 299929, Description: "Product Description 2", QuantityInStock: 3, ImagePath: "https://resources.cdn-kaspi.kz/img/m/p/h32/h70/84378448199710.jpg?format=preview-large"},
@@ -49,33 +49,27 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/home.html", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		http.ServeFile(w, r, "web-page/homepage/home.html")
-	})
-
-	r.HandleFunc("/homestyle.css", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/css")
-		http.ServeFile(w, r, "web-page/homepage/homestyle.css")
-	})
-
-	r.HandleFunc("/homescript.js", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/javascript")
-		http.ServeFile(w, r, "web-page/homepage/homescript.js")
-	})
-
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, db)
 	}).Methods("GET")
 
-	//Пагинацию надо сделать, вот так я начал
-	r.HandleFunc("/api/products", handlers.GetProducts(db)).Methods("GET").Queries("page", "{page}", "perPage", "{perPage}")
-
+	r.HandleFunc("/api/products", handlers.GetAllProducts(db)).Methods("GET")
 	r.HandleFunc("/api/products/{id}", handlers.GetProductByID(db)).Methods("GET")
 	r.HandleFunc("/api/products", handlers.CreateProduct(db)).Methods("POST")
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")
 	r.HandleFunc("/api/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:4200"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+	})
+
+	handler := c.Handler(r)
+
 	log.Println("Server is running on port 8080...")
-	http.ListenAndServe(":8080", r)
+	if err := http.ListenAndServe(":8080", handler); err != nil {
+		log.Fatal(err)
+	}
+
 }

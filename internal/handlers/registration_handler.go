@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"yourapp/db"
-	"yourapp/models"
+	"onlinestore/pkg/user"
 )
 
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user user.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Product Card Design - FantacyDesigns</title>
+
+
+</head>
+
+<body>
+
+  <section class="product-detail" *ngIf="product">
+	<div class="product__photo">
+		<div class="photo-container">
+			<div class="photo-main">
+
+				<img src="{{product.ImagePath}}" alt="product photo">
+			</div>
+			<div class="photo-album">
+				<ul>
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="product__info">
+		<div class="title">
+			<h1>{{product.Name}}</h1>
+			<span></span>
+		</div>
+		<div class="price">
+			₸ <span>{{product.Price}}</span>
+		</div>
+		<div class="variant">
+			<h3></h3>
+			<ul>
+				
+			</ul>
+		</div>
+		<div class="description">
+			<h3>BENEFITS</h3>
+			<ul>
+				
+				<li>{{product.Description}}</li>
+			</ul>
+		</div>
+		<button class="buy--btn">ADD TO CART</button>
+	</div>
+</section>
+
+<footer>
+	<p>Design from FantacyDesigns</p>
+</footer>
+
+  </body>
+</html>
+
