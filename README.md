@@ -32,9 +32,9 @@ DELETE /products/{id}
 GET /products/{id}/reviews
 POST /products/{id}/reviews
 
-GET /cart/{user_id}
-POST /cart/{user_id}
-DELETE /cart/{user_id}
+GET /cart/{product_id}
+POST /cart/{product_id}
+DELETE /cart/{product_id}
 
 GET /orders/{user_id}
 POST /orders/{user_id}
