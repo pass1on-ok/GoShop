@@ -95,6 +95,7 @@ Product_rating integer
 Table cart{
 ID bigserial primary key 
 User_ID integer ref user(id)
+Product_ID integer ref product(id)
 }
 
 Table order {
