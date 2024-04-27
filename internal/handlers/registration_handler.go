@@ -1,46 +1,33 @@
+// internal\handlers\registration_handler.go
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"onlinestore/pkg/user"
 )
 
-func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
-	var user user.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+func RegisterUserHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var newUser user.User
+	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid data format", http.StatusBadRequest)
 		return
 	}
 
-	// Validate user input (e.g., check for required fields)
-
-	// Hash user password before saving it to the database
-
-	// Save user to the database
-	err = db.CreateUser(&user)
+	err = user.CreateUser(db, newUser)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error creating user", http.StatusInternalServerError)
 		return
 	}
 
-	// Return success response
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "User created successfully")
-}
-
-func main() {
-	// Initialize database connection
-	err := db.InitDB()
-	if err != nil {
-		panic(err)
-	}
-
-	// Define HTTP routes
-	http.HandleFunc("/register", RegisterUserHandler)
-
-	// Start the HTTP server
-	http.ListenAndServe(":8080", nil)
+	response := map[string]string{"message": "User created successfully"}
+	json.NewEncoder(w).Encode(response)
+	/*
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintf(w, "User created successfully")
+	*/
 }

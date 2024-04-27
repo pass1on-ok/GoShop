@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"onlinestore/internal/handlers"
 	"onlinestore/pkg/product"
+	"onlinestore/pkg/user"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -47,6 +48,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = user.EnsureUserTableExists(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +64,10 @@ func main() {
 	r.HandleFunc("/api/products", handlers.CreateProduct(db)).Methods("POST")
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")
 	r.HandleFunc("/api/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
+
+	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RegisterUserHandler(w, r, db)
+	}).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
