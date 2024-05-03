@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://postgres:qwerty@localhost/Online%20Store?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,6 +68,10 @@ func main() {
 	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.RegisterUserHandler(w, r, db)
 	}).Methods("POST")
+
+	//add to cart
+	cartHandler := handlers.NewCartHandler(db)
+	r.HandleFunc("/api/cart/add", cartHandler.AddItemToCartHandler).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
