@@ -1,4 +1,5 @@
-// handlers.go
+// handlers/cart_handler.go
+
 package handlers
 
 import (
@@ -6,44 +7,81 @@ import (
 	"encoding/json"
 	"net/http"
 	"onlinestore/pkg/cart"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
-type CartHandler struct {
-	DB *sql.DB
-}
+func GetCartItem(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		productID, err := strconv.Atoi(params["product_id"])
+		if err != nil {
+			http.Error(w, "Invalid product ID", http.StatusBadRequest)
+			return
+		}
 
-type CartItemRequest struct {
-	UserID    int `json:"userID"`
-	ProductID int `json:"productID"`
-	Quantity  int `json:"quantity"`
-}
+		userID := 1
+		item, err := cart.GetCartItemByProductID(db, userID, productID)
+		if err != nil {
+			http.Error(w, "Error retrieving cart item", http.StatusInternalServerError)
+			return
+		}
 
-func NewCartHandler(db *sql.DB) *CartHandler {
-	return &CartHandler{
-		DB: db,
+		json.NewEncoder(w).Encode(item)
 	}
 }
 
-func (h *CartHandler) AddItemToCartHandler(w http.ResponseWriter, r *http.Request) {
-	var requestBody CartItemRequest
-	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-		http.Error(w, "Failed to parse request body", http.StatusBadRequest)
-		return
-	}
+type AddToCartRequest struct {
+	UserID   int `json:"user_id"`
+	Quantity int `json:"quantity"`
+}
 
-	item := cart.Item{
-		ProductID: requestBody.ProductID,
-		Quantity:  requestBody.Quantity,
-	}
+func AddToCart(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		productID, err := strconv.Atoi(params["product_id"])
+		if err != nil {
+			http.Error(w, "Invalid product ID", http.StatusBadRequest)
+			return
+		}
 
-	err := cart.AddToCart(h.DB, item)
-	if err != nil {
-		http.Error(w, "Failed to add item to cart: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+		// Получаем user_id из контекста или из сессии
+		userID := getCurrentUserIDFromContextOrSession(r)
 
-	// Respond with success message
-	response := map[string]string{"message": "Item added to cart"}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+		var requestBody AddToCartRequest
+		err = json.NewDecoder(r.Body).Decode(&requestBody)
+		if err != nil {
+			http.Error(w, "Failed to parse request body", http.StatusBadRequest)
+			return
+		}
+
+		err = cart.AddProductToCart(db, userID, productID, requestBody.Quantity)
+		if err != nil {
+			http.Error(w, "Error adding product to cart", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func RemoveFromCart(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		productID, err := strconv.Atoi(params["product_id"])
+		if err != nil {
+			http.Error(w, "Invalid product ID", http.StatusBadRequest)
+			return
+		}
+
+		userID := 1
+		err = cart.RemoveProductFromCart(db, userID, productID)
+		if err != nil {
+			http.Error(w, "Error removing product from cart", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
 }

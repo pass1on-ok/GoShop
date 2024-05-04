@@ -1,11 +1,13 @@
 // cmd/main.go
 package main
 
+//docker run -p 8080:8080 --network=my-network my-golang-app
 import (
 	"database/sql"
 	"log"
 	"net/http"
 	"onlinestore/internal/handlers"
+	"onlinestore/pkg/cart"
 	"onlinestore/pkg/product"
 	"onlinestore/pkg/user"
 
@@ -15,7 +17,9 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://postgres:qwerty@localhost/Online%20Store?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
+	//db, err := sql.Open("postgres", "postgres://postgres:kumar@my-postgres/Online%20Store?sslmode=disable")
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,7 +57,24 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = cart.EnsureCartTableExists(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter()
+
+	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RegisterHandler(w, r, db)
+	}).Methods("POST")
+
+	r.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LoginHandler(w, r, db)
+	}).Methods("POST")
+
+	r.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
+		handlers.LogoutHandler(w, r)
+	}).Methods("POST")
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.HomeHandler(w, r, db)
@@ -65,13 +86,11 @@ func main() {
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")
 	r.HandleFunc("/api/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
 
-	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
-		handlers.RegisterUserHandler(w, r, db)
-	}).Methods("POST")
+	r.HandleFunc("/api/cart/{product_id}", handlers.GetCartItem(db)).Methods("GET")
+	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
+	r.HandleFunc("/api/cart/{product_id}", handlers.RemoveFromCart(db)).Methods("DELETE")
 
-	//add to cart
-	cartHandler := handlers.NewCartHandler(db)
-	r.HandleFunc("/api/cart/add", cartHandler.AddItemToCartHandler).Methods("POST")
+	// Protected routes
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},

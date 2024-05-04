@@ -1,10 +1,13 @@
 module onlinestore
 
-go 1.21.6
+go 1.16
 
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/lib/pq v1.10.9
 )
 
-require github.com/rs/cors v1.10.1
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/rs/cors v1.10.1
+)

@@ -1,3 +1,5 @@
+// pkg/user/users.go
+
 package user
 
 import (
@@ -9,12 +11,12 @@ type User struct {
 	Username string
 	Email    string
 	Password string
-	// Add more fields as needed
+	Token    string
 }
 
 func CreateUser(db *sql.DB, newUser User) error {
-	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES ($1, $2, $3)`,
-		newUser.Username, newUser.Email, newUser.Password)
+	_, err := db.Exec(`INSERT INTO users (username, email, password, token) VALUES ($1, $2, $3, $4)`,
+		newUser.Username, newUser.Email, newUser.Password, newUser.Token)
 	if err != nil {
 		return err
 	}
@@ -23,11 +25,12 @@ func CreateUser(db *sql.DB, newUser User) error {
 
 func EnsureUserTableExists(db *sql.DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
-		id SERIAL PRIMARY KEY,
-		username TEXT NOT NULL,
-		email TEXT NOT NULL UNIQUE,
-		password TEXT NOT NULL
-	)`)
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        token TEXT
+    )`)
 	if err != nil {
 		return err
 	}
