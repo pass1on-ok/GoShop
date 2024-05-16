@@ -5,11 +5,12 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
+
 	"onlinestore/pkg/auth"
 	"onlinestore/pkg/user"
-	"os"
-	"strconv"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -48,35 +49,45 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	// Получить пользователя из базы данных, чтобы обновить запись с токеном
 	user, err := auth.GetUserByUsername(credentials.Username, db)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
 
-	// Обновить запись пользователя с токеном/
-
 	err = auth.UpdateUserToken(user.ID, token, db)
 	if err != nil {
-		http.Error(w, "Failed to update user token", http.StatusInternalServerError)
+		http.Error(w, "Failed to update user token: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	/*
-		err = auth.UpdateUserToken(user.ID, token, db)
-		if err != nil {
-			http.Error(w, "Failed to update user token: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	*/
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	response := map[string]string{"token": token}
 	json.NewEncoder(w).Encode(response)
 }
 
-// LogoutHandler обрабатывает запрос на выход пользователя
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func LogoutHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		http.Error(w, "Token is missing", http.StatusUnauthorized)
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	claims, err := auth.ParseToken(tokenString)
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	err = auth.UpdateUserToken(claims.UserID, "", db)
+	if err != nil {
+		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 	response := map[string]string{"message": "User logged out successfully"}
@@ -84,33 +95,69 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCurrentUserIDFromContextOrSession(r *http.Request) int {
+
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		fmt.Println("Token is missing")
+		return 0
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if err != nil {
+		fmt.Println("Error parsing token:", err)
+		return 0 // Если произошла ошибка парсинга токена, вернем 0 или другое значение по умолчанию
+	}
+	if !token.Valid {
+		fmt.Println("Token is invalid")
+		return 0 // Если токен недействителен, вернем 0 или другое значение по умолчанию
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		fmt.Println("Failed to get claims from token")
+		return 0 // Если не удалось получить claims из токена, вернем 0 или другое значение по умолчанию
+	}
+
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		fmt.Println("Failed to convert user_id to float64")
+		return 0 // Если не удалось преобразовать user_id в число float64, вернем 0 или другое значение по умолчанию
+	}
+
+	return int(userID) // Возвращаем user_id как целочисленное значение
+}
+
+/*
+func getCurrentUserIDFromContextOrSession(r *http.Request) int {
 	// Получаем токен из заголовка запроса
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		return 0 // Если токен не предоставлен, вернем 0
+		return 2 // Если токен не предоставлен, вернем 0 или другое значение по умолчанию
 	}
 
 	// Проверяем и парсим токен
-
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-		return []byte(os.Getenv("JWT_SECRET")), nil // Здесь вместо "secret" должен быть ваш секретный ключ
+		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 	if err != nil || !token.Valid {
-		return 4 // Если токен недействителен, вернем 0
+		return 3 // Если токен недействителен, вернем 0 или другое значение по умолчанию
 	}
 
 	// Извлекаем user_id из токена
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0 // Если не удалось получить claims из токена, вернем 0
+		return 4 // Если не удалось получить claims из токена, вернем 0 или другое значение по умолчанию
 	}
 
 	userID, err := strconv.Atoi(claims["user_id"].(string))
 	if err != nil {
-		return 0 // Если не удалось преобразовать user_id в число, вернем 0
+		return 5 // Если не удалось преобразовать user_id в число, вернем 0 или другое значение по умолчанию
 	}
 
 	return userID
-
 }
+*/

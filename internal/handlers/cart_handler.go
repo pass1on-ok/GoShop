@@ -21,7 +21,7 @@ func GetCartItem(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		userID := 1
+		userID := getCurrentUserIDFromContextOrSession(r)
 		item, err := cart.GetCartItemByProductID(db, userID, productID)
 		if err != nil {
 			http.Error(w, "Error retrieving cart item", http.StatusInternalServerError)
@@ -46,7 +46,6 @@ func AddToCart(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Получаем user_id из контекста или из сессии
 		userID := getCurrentUserIDFromContextOrSession(r)
 
 		var requestBody AddToCartRequest
@@ -75,7 +74,7 @@ func RemoveFromCart(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		userID := 1
+		userID := getCurrentUserIDFromContextOrSession(r)
 		err = cart.RemoveProductFromCart(db, userID, productID)
 		if err != nil {
 			http.Error(w, "Error removing product from cart", http.StatusInternalServerError)

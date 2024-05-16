@@ -1,13 +1,13 @@
 // cmd/main.go
 package main
 
-//docker run -p 8080:8080 --network=my-network my-golang-app
 import (
 	"database/sql"
 	"log"
 	"net/http"
 	"onlinestore/internal/handlers"
 	"onlinestore/pkg/cart"
+	"onlinestore/pkg/order"
 	"onlinestore/pkg/payment"
 	"onlinestore/pkg/product"
 	"onlinestore/pkg/user"
@@ -19,8 +19,6 @@ import (
 
 func main() {
 	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
-	//db, err := sql.Open("postgres", "postgres://postgres:kumar@my-postgres/Online%20Store?sslmode=disable")
-	//db, err := sql.Open("postgres", "postgres://postgres:123@localhost/Online%20Store?sslmode=disable")
 
 	if err != nil {
 		log.Fatal(err)
@@ -63,6 +61,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = order.EnsureOrderTableExists(db)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = payment.EnsurePaymentInfoTableExists(db)
 	if err != nil {
@@ -80,7 +82,7 @@ func main() {
 	}).Methods("POST")
 
 	r.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
-		handlers.LogoutHandler(w, r)
+		handlers.LogoutHandler(w, r, db)
 	}).Methods("POST")
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
