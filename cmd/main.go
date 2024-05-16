@@ -10,6 +10,7 @@ import (
 	"onlinestore/pkg/order"
 	"onlinestore/pkg/payment"
 	"onlinestore/pkg/product"
+	"onlinestore/pkg/review"
 	"onlinestore/pkg/user"
 
 	"github.com/gorilla/mux"
@@ -71,6 +72,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = review.EnsureReviewTableExists(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +101,10 @@ func main() {
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")
 	r.HandleFunc("/api/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
 
-	r.HandleFunc("api/cart", handlers.GetCartItemsHandler(db)).Methods("GET")
+	r.HandleFunc("/api/products/{id}/review", handlers.CreateProductReview(db)).Methods("POST")
+	r.HandleFunc("/api/products/{id}/review", handlers.GetProductReviews(db)).Methods("GET")
+
+	r.HandleFunc("/api/cart", handlers.GetCartItemsHandler(db)).Methods("GET")
 	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
 	r.HandleFunc("/api/cart/{product_id}", handlers.RemoveFromCart(db)).Methods("DELETE")
 
