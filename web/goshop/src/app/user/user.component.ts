@@ -25,6 +25,7 @@ export class UserComponent {
     this.userService.getUserProfile()
       .subscribe(
         (data) => {
+          console.log('User profile data:', data); // Добавляем эту строку для отладки
           this.user = data;
         },
         (error) => {

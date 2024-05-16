@@ -19,29 +19,6 @@ type CreatePaymentRequest struct {
 	PaymentAmount float64 `json:"payment_amount"`
 }
 
-func GetPayment(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		params := mux.Vars(r)
-		paymentID, err := strconv.Atoi(params["payment_id"])
-		if err != nil {
-			http.Error(w, "Invalid payment ID", http.StatusBadRequest)
-			return
-		}
-
-		p, err := payment.GetPaymentInfoByID(db, paymentID)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "Payment not found", http.StatusNotFound)
-			} else {
-				http.Error(w, "Error retrieving payment", http.StatusInternalServerError)
-			}
-			return
-		}
-
-		json.NewEncoder(w).Encode(p)
-	}
-}
-
 func CreatePayment(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var requestBody CreatePaymentRequest
@@ -51,10 +28,13 @@ func CreatePayment(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		userID := getCurrentUserIDFromContextOrSession(r) // Получение user_id из текущего сеанса
+
 		paymentInfo := payment.PaymentInfo{
 			OrderID:       requestBody.OrderID,
 			PaymentAmount: requestBody.PaymentAmount,
 			PaymentDate:   time.Now(),
+			UserID:        userID, // Использование user_id текущего сеанса
 		}
 
 		err = payment.CreatePaymentInfo(db, paymentInfo)
@@ -76,10 +56,9 @@ func CreatePaymentForOrder(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Получение user_id из сеанса или токена
-		userID := getCurrentUserIDFromContextOrSession(r)
+		userID := getCurrentUserIDFromContextOrSession(r) // Получение user_id из текущего сеанса
 
-		// Получение цены продуктов для данного заказа из базы данных
+		// Получение общей стоимости заказа
 		orderTotal, err := order.GetOrderTotal(db, orderID)
 		if err != nil {
 			http.Error(w, "Error retrieving order total", http.StatusInternalServerError)
@@ -91,7 +70,7 @@ func CreatePaymentForOrder(db *sql.DB) http.HandlerFunc {
 			OrderID:       orderID,
 			PaymentAmount: orderTotal,
 			PaymentDate:   time.Now(),
-			UserID:        userID, // Передача user_id в информацию о платеже
+			UserID:        userID, // Использование user_id текущего сеанса
 		}
 
 		// Сохранение информации о платеже в базе данных
@@ -102,5 +81,44 @@ func CreatePaymentForOrder(db *sql.DB) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func GetAllPaymentsForCurrentUser(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := getCurrentUserIDFromContextOrSession(r) // Получение текущего пользователя из сессии
+
+		payments, err := payment.GetAllPaymentsByUserID(db, userID)
+		if err != nil {
+			http.Error(w, "Error retrieving payments", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(payments)
+	}
+}
+
+// Обработчик для получения платежа по его ID
+func GetPaymentByID(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		ID, err := strconv.Atoi(params["id"])
+		if err != nil {
+			http.Error(w, "Invalid payment ID", http.StatusBadRequest)
+			return
+		}
+		userID := getCurrentUserIDFromContextOrSession(r)
+
+		p, err := payment.GetPaymentInfoByID(db, ID, userID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Payment not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "Error retrieving payment", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		json.NewEncoder(w).Encode(p)
 	}
 }

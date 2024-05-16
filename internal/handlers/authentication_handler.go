@@ -130,34 +130,3 @@ func getCurrentUserIDFromContextOrSession(r *http.Request) int {
 
 	return int(userID) // Возвращаем user_id как целочисленное значение
 }
-
-/*
-func getCurrentUserIDFromContextOrSession(r *http.Request) int {
-	// Получаем токен из заголовка запроса
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		return 2 // Если токен не предоставлен, вернем 0 или другое значение по умолчанию
-	}
-
-	// Проверяем и парсим токен
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
-	})
-	if err != nil || !token.Valid {
-		return 3 // Если токен недействителен, вернем 0 или другое значение по умолчанию
-	}
-
-	// Извлекаем user_id из токена
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return 4 // Если не удалось получить claims из токена, вернем 0 или другое значение по умолчанию
-	}
-
-	userID, err := strconv.Atoi(claims["user_id"].(string))
-	if err != nil {
-		return 5 // Если не удалось преобразовать user_id в число, вернем 0 или другое значение по умолчанию
-	}
-
-	return userID
-}
-*/

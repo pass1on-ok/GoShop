@@ -12,6 +12,7 @@ import { ProductDetailComponent } from './product-detail/product-detail.componen
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
+import { LogoutComponent } from './logout/logout.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { UserComponent } from './user/user.component';
     ProductDetailComponent,
     RegisterComponent,
     LoginComponent,
+    LogoutComponent,
     UserComponent
   ],
   imports: [

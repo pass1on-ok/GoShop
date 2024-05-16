@@ -103,13 +103,15 @@ func main() {
 
 	r.HandleFunc("/api/products/{id}/review", handlers.CreateProductReview(db)).Methods("POST")
 	r.HandleFunc("/api/products/{id}/review", handlers.GetProductReviews(db)).Methods("GET")
+
 	r.HandleFunc("/api/products/{id}/cart", handlers.AddToCartForProduct(db)).Methods("POST")
 
 	r.HandleFunc("/api/cart", handlers.GetCartItemsHandler(db)).Methods("GET")
 	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
 	r.HandleFunc("/api/cart/{product_id}", handlers.RemoveFromCart(db)).Methods("DELETE")
 
-	r.HandleFunc("/api/payments/{payment_id}", handlers.GetPayment(db)).Methods("GET")
+	r.HandleFunc("/api/payments", handlers.GetAllPaymentsForCurrentUser(db)).Methods("GET")
+	r.HandleFunc("/api/payments/{id}", handlers.GetPaymentByID(db)).Methods("GET")
 	r.HandleFunc("/api/payments", handlers.CreatePayment(db)).Methods("POST")
 
 	r.HandleFunc("/api/orders", func(w http.ResponseWriter, r *http.Request) {
