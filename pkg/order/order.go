@@ -76,3 +76,22 @@ func GetOrderByID(orderID int, db *sql.DB) (*Order, error) {
 	}
 	return &order, nil
 }
+
+func GetOrderTotal(db *sql.DB, orderID int) (float64, error) {
+	// Выполнение запроса к базе данных для получения цен продуктов в заказе
+	rows, err := db.Query("SELECT SUM(price) FROM products WHERE id IN (SELECT product_id FROM order_items WHERE order_id = $1)", orderID)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var orderTotal float64
+	for rows.Next() {
+		err := rows.Scan(&orderTotal)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return orderTotal, nil
+}

@@ -106,3 +106,33 @@ func RemoveFromCart(db *sql.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func AddToCartForProduct(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		productID, err := strconv.Atoi(params["id"]) // Получаем product_id из пути
+		if err != nil {
+			http.Error(w, "Invalid product ID", http.StatusBadRequest)
+			return
+		}
+
+		// Получаем текущий user_id из контекста или сессии
+		userID := getCurrentUserIDFromContextOrSession(r)
+
+		var requestBody AddToCartRequest
+		err = json.NewDecoder(r.Body).Decode(&requestBody)
+		if err != nil {
+			http.Error(w, "Failed to parse request body", http.StatusBadRequest)
+			return
+		}
+
+		// Используем user_id и product_id для добавления товара в корзину
+		err = cart.AddProductToCart(db, userID, productID, requestBody.Quantity)
+		if err != nil {
+			http.Error(w, "Error adding product to cart", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}
+}

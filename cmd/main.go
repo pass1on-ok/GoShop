@@ -103,6 +103,7 @@ func main() {
 
 	r.HandleFunc("/api/products/{id}/review", handlers.CreateProductReview(db)).Methods("POST")
 	r.HandleFunc("/api/products/{id}/review", handlers.GetProductReviews(db)).Methods("GET")
+	r.HandleFunc("/api/products/{id}/cart", handlers.AddToCartForProduct(db)).Methods("POST")
 
 	r.HandleFunc("/api/cart", handlers.GetCartItemsHandler(db)).Methods("GET")
 	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
@@ -117,10 +118,11 @@ func main() {
 	r.HandleFunc("/api/orders", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetOrdersHandler(w, r, db)
 	}).Methods("GET")
-	// Маршрут для получения заказа по его ID
 	r.HandleFunc("/api/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetOrderHandler(w, r, db)
 	}).Methods("GET")
+
+	r.HandleFunc("/api/orders/{id}/payment", handlers.CreatePaymentForOrder(db)).Methods("POST")
 
 	// Protected routes
 

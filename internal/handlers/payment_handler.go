@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"onlinestore/pkg/order"
 	"onlinestore/pkg/payment"
 	"strconv"
 	"time"
@@ -56,6 +57,44 @@ func CreatePayment(db *sql.DB) http.HandlerFunc {
 			PaymentDate:   time.Now(),
 		}
 
+		err = payment.CreatePaymentInfo(db, paymentInfo)
+		if err != nil {
+			http.Error(w, "Error creating payment", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+func CreatePaymentForOrder(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		orderID, err := strconv.Atoi(params["id"])
+		if err != nil {
+			http.Error(w, "Invalid order ID", http.StatusBadRequest)
+			return
+		}
+
+		// Получение user_id из сеанса или токена
+		userID := getCurrentUserIDFromContextOrSession(r)
+
+		// Получение цены продуктов для данного заказа из базы данных
+		orderTotal, err := order.GetOrderTotal(db, orderID)
+		if err != nil {
+			http.Error(w, "Error retrieving order total", http.StatusInternalServerError)
+			return
+		}
+
+		// Создание информации о платеже
+		paymentInfo := payment.PaymentInfo{
+			OrderID:       orderID,
+			PaymentAmount: orderTotal,
+			PaymentDate:   time.Now(),
+			UserID:        userID, // Передача user_id в информацию о платеже
+		}
+
+		// Сохранение информации о платеже в базе данных
 		err = payment.CreatePaymentInfo(db, paymentInfo)
 		if err != nil {
 			http.Error(w, "Error creating payment", http.StatusInternalServerError)
