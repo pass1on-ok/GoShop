@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"onlinestore/internal/handlers"
 	"onlinestore/pkg/cart"
+	"onlinestore/pkg/payment"
 	"onlinestore/pkg/product"
 	"onlinestore/pkg/user"
 
@@ -19,6 +20,7 @@ import (
 func main() {
 	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
 	//db, err := sql.Open("postgres", "postgres://postgres:kumar@my-postgres/Online%20Store?sslmode=disable")
+	//db, err := sql.Open("postgres", "postgres://postgres:123@localhost/Online%20Store?sslmode=disable")
 
 	if err != nil {
 		log.Fatal(err)
@@ -62,6 +64,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = payment.EnsurePaymentInfoTableExists(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/register", func(w http.ResponseWriter, r *http.Request) {
@@ -89,6 +96,9 @@ func main() {
 	r.HandleFunc("/api/cart/{product_id}", handlers.GetCartItem(db)).Methods("GET")
 	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
 	r.HandleFunc("/api/cart/{product_id}", handlers.RemoveFromCart(db)).Methods("DELETE")
+
+	r.HandleFunc("/api/payments/{payment_id}", handlers.GetPayment(db)).Methods("GET")
+	r.HandleFunc("/api/payments", handlers.CreatePayment(db)).Methods("POST")
 
 	// Protected routes
 
