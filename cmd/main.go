@@ -95,12 +95,23 @@ func main() {
 	r.HandleFunc("/api/products/{id}", handlers.UpdateProduct(db)).Methods("PUT")
 	r.HandleFunc("/api/products/{id}", handlers.DeleteProduct(db)).Methods("DELETE")
 
-	r.HandleFunc("/api/cart/{product_id}", handlers.GetCartItem(db)).Methods("GET")
+	r.HandleFunc("api/cart", handlers.GetCartItemsHandler(db)).Methods("GET")
 	r.HandleFunc("/api/cart/{product_id}", handlers.AddToCart(db)).Methods("POST")
 	r.HandleFunc("/api/cart/{product_id}", handlers.RemoveFromCart(db)).Methods("DELETE")
 
 	r.HandleFunc("/api/payments/{payment_id}", handlers.GetPayment(db)).Methods("GET")
 	r.HandleFunc("/api/payments", handlers.CreatePayment(db)).Methods("POST")
+
+	r.HandleFunc("/api/orders", func(w http.ResponseWriter, r *http.Request) {
+		handlers.PostOrderHandler(w, r, db)
+	}).Methods("POST")
+	r.HandleFunc("/api/orders", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetOrdersHandler(w, r, db)
+	}).Methods("GET")
+	// Маршрут для получения заказа по его ID
+	r.HandleFunc("/api/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetOrderHandler(w, r, db)
+	}).Methods("GET")
 
 	// Protected routes
 

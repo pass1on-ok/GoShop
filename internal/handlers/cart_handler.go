@@ -32,6 +32,28 @@ func GetCartItem(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func GetCartItemsHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Получаем текущий user_id из контекста или сессии
+		userID := getCurrentUserIDFromContextOrSession(r)
+		if userID == 0 {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Получаем содержимое корзины для текущего пользователя
+		items, err := cart.GetCartItemsByUserID(db, userID)
+		if err != nil {
+			http.Error(w, "Error retrieving cart items", http.StatusInternalServerError)
+			return
+		}
+
+		// Отправляем содержимое корзины в формате JSON
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(items)
+	}
+}
+
 type AddToCartRequest struct {
 	UserID   int `json:"user_id"`
 	Quantity int `json:"quantity"`

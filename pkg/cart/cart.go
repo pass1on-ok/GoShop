@@ -51,3 +51,27 @@ func RemoveProductFromCart(db *sql.DB, userID, productID int) error {
 	}
 	return nil
 }
+
+func GetCartItemsByUserID(db *sql.DB, userID int) ([]CartItem, error) {
+	rows, err := db.Query("SELECT id, user_id, product_id, quantity FROM cart WHERE user_id = $1", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []CartItem
+	for rows.Next() {
+		var item CartItem
+		err := rows.Scan(&item.ID, &item.UserID, &item.ProductID, &item.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}

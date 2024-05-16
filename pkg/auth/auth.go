@@ -5,7 +5,9 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"net/http"
 	"onlinestore/pkg/user"
+	"strings"
 
 	"time"
 
@@ -103,6 +105,18 @@ func UpdateUserToken(userID int, token string, db *sql.DB) error {
 		return err
 	}
 	return nil
+}
+
+func ExtractToken(r *http.Request) (string, error) {
+
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		return "", errors.New("token is missing")
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	return tokenString, nil
 }
 
 /*
