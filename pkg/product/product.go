@@ -3,6 +3,7 @@ package product
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type Product struct {
@@ -113,4 +114,58 @@ func EnsureTableExists(db *sql.DB) error {
 		imagepath TEXT
 	)`)
 	return err
+}
+
+func GetPaginatedProducts(db *sql.DB, pageSize, offset int) ([]Product, error) {
+	var products []Product
+	query := "SELECT id, name, price, description, quantity_in_stock, imagepath FROM products LIMIT $1 OFFSET $2"
+	rows, err := db.Query(query, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var p Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock, &p.ImagePath); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+	return products, rows.Err()
+}
+
+func GetSortedProducts(db *sql.DB, sortBy, sortOrder string) ([]Product, error) {
+	var products []Product
+	query := fmt.Sprintf("SELECT id, name, price, description, quantity_in_stock, imagepath FROM products ORDER BY %s %s", sortBy, sortOrder)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var p Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock, &p.ImagePath); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+	return products, rows.Err()
+}
+
+func GetFilteredProducts(db *sql.DB, filter string) ([]Product, error) {
+	var products []Product
+	query := "SELECT id, name, price, description, quantity_in_stock, imagepath FROM products WHERE name ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%'"
+	rows, err := db.Query(query, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var p Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description, &p.QuantityInStock, &p.ImagePath); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+	return products, rows.Err()
 }

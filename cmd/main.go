@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://postgres:kumar@localhost/Online%20Store?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://postgres:qwerty@localhost/Online%20Store?sslmode=disable")
 
 	if err != nil {
 		log.Fatal(err)
@@ -122,6 +122,18 @@ func main() {
 	}).Methods("GET")
 	r.HandleFunc("/api/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetOrderHandler(w, r, db)
+	}).Methods("GET")
+
+	r.HandleFunc("/api/products/pagination/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetPaginatedProductsHandler(w, r, db)
+	}).Methods("GET")
+
+	r.HandleFunc("/api/products/sort/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetSortedProductsHandler(w, r, db)
+	}).Methods("GET")
+
+	r.HandleFunc("/api/products/filter/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetFilteredProductsHandler(w, r, db)
 	}).Methods("GET")
 
 	r.HandleFunc("/api/orders/{id}/payment", handlers.CreatePaymentForOrder(db)).Methods("POST")
