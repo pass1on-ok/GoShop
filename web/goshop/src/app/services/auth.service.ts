@@ -1,7 +1,5 @@
-// auth.service.ts
-
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -10,22 +8,25 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8080/api'; 
+  private baseUrl = 'http://localhost:8080/api';
+  private tokenKey = 'token';
 
   constructor(private http: HttpClient) { }
 
-  login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/login`, { email, password }).pipe(
+  login(username: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/login`, { username, password }).pipe(
       tap(res => {
-        
-        localStorage.setItem('token', res.token);
+        localStorage.setItem(this.tokenKey, res.token);
       })
     );
   }
 
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
   logout(): void {
-    
-    localStorage.removeItem('token');
+    localStorage.removeItem(this.tokenKey);
   }
 
   register(username: string, email: string, password: string): Observable<any> {

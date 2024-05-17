@@ -39,6 +39,16 @@ func EnsureUserTableExists(db *sql.DB) error {
 	return nil
 }
 
+func GetUserByIDFromDB(db *sql.DB, userID int) (*User, error) {
+	var user User
+	err := db.QueryRow("SELECT id, username, email,password, token FROM users WHERE id = $1", userID).
+		Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Token)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func GetUserByEmail(db *sql.DB, email string) (*User, error) {
 	var user User
 	err := db.QueryRow("SELECT id, username, email, password, token FROM users WHERE email = $1", email).Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Token)

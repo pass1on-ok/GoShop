@@ -28,13 +28,13 @@ func CreatePayment(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		userID := getCurrentUserIDFromContextOrSession(r) // Получение user_id из текущего сеанса
+		userID := getCurrentUserIDFromContextOrSession(r)
 
 		paymentInfo := payment.PaymentInfo{
 			OrderID:       requestBody.OrderID,
 			PaymentAmount: requestBody.PaymentAmount,
 			PaymentDate:   time.Now(),
-			UserID:        userID, // Использование user_id текущего сеанса
+			UserID:        userID,
 		}
 
 		err = payment.CreatePaymentInfo(db, paymentInfo)

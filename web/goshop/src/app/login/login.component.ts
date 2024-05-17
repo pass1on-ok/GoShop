@@ -12,10 +12,11 @@ export class LoginComponent {
 
   constructor(private authService: AuthService) { }
 
-  login(email: string, password: string): void {
-    this.authService.login(email, password).subscribe(
+  login(username: string, password: string): void {
+    this.authService.login(username, password).subscribe(
       
       res => console.log('Logged in successfully'),
+      
       
       err => console.error('Login error:', err)
     );

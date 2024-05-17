@@ -23,8 +23,8 @@ func EnsurePaymentInfoTableExists(db *sql.DB) error {
         payment_amount NUMERIC NOT NULL,
         payment_date TIMESTAMP NOT NULL,
         FOREIGN KEY (order_id) REFERENCES orders(id),
-		FOREIGN KEY (user_id) REFERENCES users(id),
-		FOREIGN KEY (payment_amount) REFERENCES products(id)
+		FOREIGN KEY (user_id) REFERENCES users(id)
+		
     )`)
 	if err != nil {
 		return err

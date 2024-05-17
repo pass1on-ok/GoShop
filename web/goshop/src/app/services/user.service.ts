@@ -1,16 +1,25 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8080/api/user'; 
+  private apiUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
 
-  getUserProfile(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/profile`);
+  getUserProfile(): Observable<User | undefined> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Возвращаем пустой Observable, если токен отсутствует
+      return of(undefined);
+    }
+
+    console.log(token)
+    const headers = new HttpHeaders().set('Authorization', 'Bearer ' + token);
+    return this.http.get<User>(`${this.apiUrl}/profile`, { headers });
   }
 }

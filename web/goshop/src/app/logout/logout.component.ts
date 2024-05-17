@@ -10,7 +10,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./logout.component.css']
 })
 export class LogoutComponent {
-
+/*
   constructor(private authService: AuthService, private router: Router) {}
 
   logoutUser() {
@@ -28,4 +28,5 @@ export class LogoutComponent {
         }
       );
   }
+  */
 }

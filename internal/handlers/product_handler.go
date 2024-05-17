@@ -51,6 +51,27 @@ func GetProductByID(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+/*
+	func GetProductsByCategoryID(db *sql.DB) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			params := mux.Vars(r)
+			categoryID, err := strconv.Atoi(params["id"])
+			if err != nil {
+				http.Error(w, "Invalid category ID", http.StatusBadRequest)
+				return
+			}
+
+			products, err := product.GetProductsByCategoryIDFromDB(db, categoryID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(products)
+		}
+	}
+*/
 func CreateProduct(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

@@ -3,7 +3,6 @@ package review
 
 import "database/sql"
 
-// Review представляет отзыв о продукте
 type Review struct {
 	ID        int    `json:"id"`
 	ProductID int    `json:"product_id"`
@@ -26,7 +25,6 @@ func EnsureReviewTableExists(db *sql.DB) error {
 	return err
 }
 
-// InsertProductReviewToDB вставляет новый отзыв о продукте в базу данных
 func InsertProductReviewToDB(db *sql.DB, review Review, userID int) error {
 	_, err := db.Exec("INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)",
 		review.ProductID, userID, review.Rating, review.Comment)
@@ -36,7 +34,6 @@ func InsertProductReviewToDB(db *sql.DB, review Review, userID int) error {
 	return nil
 }
 
-// GetProductReviewsFromDB возвращает отзывы о продукте из базы данных по его ID
 func GetProductReviewsFromDB(db *sql.DB, productID int) ([]Review, error) {
 	rows, err := db.Query("SELECT id, product_id, user_id, rating, comment FROM product_reviews WHERE product_id = $1", productID)
 	if err != nil {
