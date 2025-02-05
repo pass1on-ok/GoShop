@@ -4,7 +4,6 @@ Authors and his IDs:
 Oskenbay Kumar, 22B030495
 Kenesbek Asylmurat, 22B030376
 Murat Dias, 22B030564
-Mirpulatov Rozimurat, 22B031185
 ```
 
 Application where users can view products, add them to cart, place orders and view order history.
