@@ -1,7 +1,9 @@
 # Online Store
 ```
-Developer:
-Oskenbay Kumar
+Developers:
+Oskenbay Kumar,
+Murat Dias,
+Kenesbek Asylmurat
 ```
 
 Application where users can view products, add them to cart, place orders and view order history.
